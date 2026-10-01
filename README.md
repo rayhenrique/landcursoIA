@@ -27,6 +27,7 @@ Landing page premium desenvolvida para capturar leads para a lista de espera do 
 - **Animações:** Framer Motion
 - **Ícones:** Lucide React
 - **Fonte:** Inter (Google Fonts)
+- **Backend:** Supabase (PostgreSQL + Auth + Realtime)
 
 ## 🎨 Design System
 
@@ -46,22 +47,38 @@ Landing page premium desenvolvida para capturar leads para a lista de espera do 
 - Bordas finas e translúcidas
 - Muito whitespace e respiro visual
 
-## 📦 Estrutura de Componentes
+## 📦 Estrutura de Arquivos
 
 ```
-src/
-├── components/
-│   ├── Navbar.tsx              # Navegação fixa minimalista
-│   ├── HeroSection.tsx         # Hero cinematográfico com CTA
-│   ├── VibeCodingMockup.tsx    # Mockup animado (CRÍTICO)
-│   ├── ProblemSection.tsx      # Dores e soluções
-│   ├── ProcessSection.tsx      # Método em 3 passos
-│   ├── WhatYouCanCreate.tsx    # Exemplos de projetos
-│   ├── AuthorSection.tsx       # Bio do mentor
-│   └── Footer.tsx              # CTA final + copyright
-├── App.tsx                     # Composição principal
-├── main.tsx                    # Entry point
-└── index.css                   # Estilos globais + Tailwind
+landcursoIA/
+├── src/
+│   ├── components/
+│   │   ├── Navbar.tsx              # Navegação fixa minimalista
+│   │   ├── HeroSection.tsx         # Hero cinematográfico com CTA
+│   │   ├── VibeCodingMockup.tsx    # Mockup animado (CRÍTICO)
+│   │   ├── ProblemSection.tsx      # Dores e soluções
+│   │   ├── ProcessSection.tsx      # Método em 3 passos
+│   │   ├── WhatYouCanCreate.tsx    # Exemplos de projetos
+│   │   ├── AuthorSection.tsx       # Bio do mentor
+│   │   └── Footer.tsx              # CTA final + copyright
+│   ├── hooks/
+│   │   └── useWaitlist.ts          # Hook para formulários
+│   ├── lib/
+│   │   └── supabase.ts             # Cliente Supabase configurado
+│   ├── services/
+│   │   └── leads.ts                # Funções de CRUD para waitlist
+│   ├── types/
+│   │   └── supabase.ts             # Tipos TypeScript
+│   ├── App.tsx                     # Composição principal
+│   ├── main.tsx                    # Entry point
+│   ├── index.css                   # Estilos globais + Tailwind
+│   └── vite-env.d.ts               # Tipos do Vite
+├── supabase/
+│   └── schema.sql                  # SQL para criar tabela no Supabase
+├── .env.example                    # Template de variáveis de ambiente
+├── .env.local                      # Variáveis locais (não commitar)
+├── SUPABASE_SETUP.md               # Guia completo de configuração
+└── README.md                       # Este arquivo
 ```
 
 ### Componente Crítico: VibeCodingMockup
@@ -94,11 +111,52 @@ O ciclo se repete automaticamente usando `AnimatePresence` do Framer Motion.
 - Mockup se adapta graciosamente em telas menores
 - Grid responsivo em todas as seções
 
+## 🗄️ Integração com Supabase
+
+O projeto está configurado para usar **Supabase** como backend para captura de leads.
+
+### Funcionalidades
+- ✅ Captura de emails na waitlist
+- ✅ Validação de duplicatas
+- ✅ Tracking de origem (hero/footer)
+- ✅ Modo demo (funciona sem Supabase)
+- ✅ Row Level Security (RLS) configurado
+
+### Configuração Rápida
+
+1. Crie um projeto em [supabase.com](https://supabase.com)
+2. Execute `supabase/schema.sql` no SQL Editor
+3. Copie as credenciais para `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+4. Edite `.env.local` com suas credenciais:
+
+```env
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-anon-aqui
+```
+
+📖 **Guia completo:** Veja [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) para instruções detalhadas.
+
+### Modo Desenvolvimento (sem Supabase)
+
+Se você não configurar o Supabase, o projeto funciona em **modo demo**:
+- Formulários aceitam emails
+- Retorna sucesso simulado
+- Nenhum dado é salvo
+- Console mostra aviso
+
+Isso permite desenvolver a UI sem precisar do banco.
+
 ## 🚀 Como Executar
 
 ### Pré-requisitos
 - Node.js 18+ 
 - npm ou yarn
+- (Opcional) Conta no Supabase para captura de leads
 
 ### Instalação
 
@@ -111,6 +169,10 @@ cd landcursoIA
 
 # Instale as dependências
 npm install
+
+# Configure as variáveis de ambiente (opcional)
+cp .env.example .env.local
+# Edite .env.local com suas credenciais do Supabase
 ```
 
 ### Desenvolvimento
@@ -146,6 +208,24 @@ npm run typecheck
 | `npm run build` | Gera build otimizado para produção |
 | `npm run typecheck` | Verifica tipos TypeScript |
 | `npm run preview` | Preview do build de produção |
+
+## 🔐 Variáveis de Ambiente
+
+Crie um arquivo `.env.local` na raiz do projeto:
+
+```env
+# Supabase (obtenha em supabase.com → Settings → API)
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-anon-aqui
+
+# Ambiente
+VITE_APP_ENV=development
+```
+
+**⚠️ Importante:**
+- Use a chave `anon` (pública), NUNCA a `service_role`
+- O arquivo `.env.local` já está no `.gitignore`
+- Sem essas variáveis, o projeto funciona em modo demo
 
 ## 🎯 Seções da Landing Page
 

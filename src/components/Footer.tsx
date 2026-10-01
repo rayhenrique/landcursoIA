@@ -1,19 +1,9 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Zap, Linkedin } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, Zap, Linkedin, Loader2, AlertCircle } from 'lucide-react';
+import { useWaitlist } from '../hooks/useWaitlist';
 
 export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setSubmitted(true);
-      setTimeout(() => setSubmitted(false), 3000);
-      setEmail('');
-    }
-  };
+  const { email, setEmail, status, message, handleSubmit } = useWaitlist();
 
   return (
     <footer className="relative">
@@ -43,32 +33,53 @@ export default function Footer() {
 
             {/* Email form */}
             <form
-              onSubmit={handleSubmit}
-              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+              onSubmit={(e) => handleSubmit(e, 'footer_section')}
+              className="flex flex-col gap-3 max-w-md mx-auto"
             >
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                aria-label="Seu endereço de e-mail para lista de espera"
-                className="flex-1 px-4 py-3.5 rounded-xl bg-[#0A0A0A] border border-white/10 text-white placeholder:text-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-                required
-              />
-              <button
-                type="submit"
-                aria-label="Entrar na lista de espera"
-                className="glow-button flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 text-white font-medium text-sm hover:bg-blue-500 active:scale-[0.98] transition-all duration-200 cursor-pointer whitespace-nowrap"
-              >
-                {submitted ? (
-                  '✓ Confirmado!'
-                ) : (
-                  <>
-                    Entrar na Lista
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  aria-label="Seu endereço de e-mail para lista de espera"
+                  disabled={status === 'loading'}
+                  className="flex-1 px-4 py-3.5 rounded-xl bg-[#0A0A0A] border border-white/10 text-white placeholder:text-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 disabled:opacity-50"
+                  required
+                />
+                <button
+                  type="submit"
+                  aria-label="Entrar na lista de espera"
+                  disabled={status === 'loading'}
+                  className="glow-button flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 text-white font-medium text-sm hover:bg-blue-500 active:scale-[0.98] transition-all duration-200 cursor-pointer whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {status === 'loading' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : status === 'success' ? (
+                    '✓ Confirmado!'
+                  ) : (
+                    <>
+                      Entrar na Lista
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Feedback message */}
+              {message && status === 'error' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 text-sm text-red-400 justify-center"
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{message}</span>
+                </motion.div>
+              )}
             </form>
           </motion.div>
         </div>
