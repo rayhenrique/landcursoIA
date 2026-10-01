@@ -1,20 +1,10 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import VibeCodingMockup from './VibeCodingMockup';
+import { useWaitlist } from '../hooks/useWaitlist';
 
 export default function HeroSection() {
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setSubmitted(true);
-      setTimeout(() => setSubmitted(false), 3000);
-      setEmail('');
-    }
-  };
+  const { email, setEmail, status, message, handleSubmit } = useWaitlist();
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 overflow-hidden">
@@ -70,34 +60,55 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
-              onSubmit={handleSubmit}
-              className="flex flex-col sm:flex-row gap-3"
+              onSubmit={(e) => handleSubmit(e, 'hero_section')}
+              className="flex flex-col gap-3"
             >
-              <div className="relative flex-1">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  aria-label="Seu endereço de e-mail"
-                  className="w-full px-4 py-3.5 rounded-xl bg-[#0A0A0A] border border-white/10 text-white placeholder:text-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-                  required
-                />
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    aria-label="Seu endereço de e-mail"
+                    disabled={status === 'loading'}
+                    className="w-full px-4 py-3.5 rounded-xl bg-[#0A0A0A] border border-white/10 text-white placeholder:text-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 disabled:opacity-50"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  aria-label="Garantir minha vaga na lista de espera"
+                  disabled={status === 'loading'}
+                  className="glow-button flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 text-white font-medium text-sm hover:bg-blue-500 active:scale-[0.98] transition-all duration-200 cursor-pointer whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {status === 'loading' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Processando...
+                    </>
+                  ) : status === 'success' ? (
+                    '✓ Inscrição Confirmada!'
+                  ) : (
+                    <>
+                      Garantir Vaga
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
               </div>
-              <button
-                type="submit"
-                aria-label="Garantir minha vaga na lista de espera"
-                className="glow-button flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 text-white font-medium text-sm hover:bg-blue-500 active:scale-[0.98] transition-all duration-200 cursor-pointer whitespace-nowrap"
-              >
-                {submitted ? (
-                  '✓ Inscrição Confirmada!'
-                ) : (
-                  <>
-                    Garantir Vaga
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
+
+              {/* Feedback message */}
+              {message && status === 'error' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 text-sm text-red-400"
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{message}</span>
+                </motion.div>
+              )}
             </motion.form>
 
             {/* Social proof */}
